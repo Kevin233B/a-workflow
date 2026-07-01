@@ -24,19 +24,26 @@ jobs:
         mkdir build && cd build
         cmake -G Ninja -S ../llvm -B . \
           -DCMAKE_BUILD_TYPE=Release \
-          -DLLVM_ENABLE_PROJECTS="clang" \
+          -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld;polly" \
           -DCMAKE_CXX_STANDARD=14 \
           -DCMAKE_CXX_FLAGS="-include limits" \
           -DLLVM_ENABLE_WERROR=OFF \
-          -DLLVM_ENABLE_WARNINGS=OFF
+          -DLLVM_ENABLE_WARNINGS=OFF \
+          -DLLVM_TARGETS_TO_BUILD="AArch64;ARM;X86" \
+          -DCMAKE_INSTALL_PREFIX=/usr/local
     
     - name: Build
       run: |
         cd llvm-project/build
         ninja -j$(nproc)
     
+    - name: Install
+      run: |
+        cd llvm-project/build
+        sudo ninja install
+    
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: llvm-clang
-        path: llvm-project/build/bin/
+        path: /usr/local/bin/
