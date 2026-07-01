@@ -8,12 +8,10 @@ jobs:
     runs-on: ubuntu-22.04
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        repository: android/toolchain-llvm-project
-        ref: llvm-r383902b
-        depth: 1
+    - name: Clone Google LLVM
+      run: |
+        git clone --depth 1 --branch llvm-r383902b https://android.googlesource.com/toolchain/llvm-project
+        cd llvm-project
     
     - name: Install dependencies
       run: |
@@ -22,6 +20,7 @@ jobs:
     
     - name: Configure CMake
       run: |
+        cd llvm-project
         mkdir build && cd build
         cmake -G Ninja -S ../llvm -B . \
           -DCMAKE_BUILD_TYPE=Release \
@@ -32,11 +31,11 @@ jobs:
     
     - name: Build
       run: |
-        cd build
+        cd llvm-project/build
         ninja -j$(nproc)
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: llvm-clang
-        path: build/bin/
+        path: llvm-project/build/bin/
